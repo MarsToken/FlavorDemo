@@ -1,0 +1,159 @@
+apply plugin: 'com.android.application'
+android {
+    //编译变体 > 编译版本类型 > 正式版类型 > 主源集 > 库依赖项
+    compileSdkVersion 28
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        //应用商店识别的唯一标志，与包名无关，默认一样
+        applicationId "com.example.multipackagedemo"
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    //版本类型 3
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            manifestPlaceholders = [sharedUserId: ""]
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+            //自定义BuildConfigFiled
+            buildConfigField "Boolean", "isTest", "true"
+            //自定义AndroidManifest.xml
+            manifestPlaceholders = [sharedUserId: ""]
+        }
+        /**
+         * The `initWith` property allows you to copy configurations from other build types,
+         * then configure only the settings you want to change. This one copies the debug build
+         * type, and then changes the manifest placeholder and application ID.
+         */
+        staging {
+            initWith debug
+            applicationIdSuffix ".debugStaging"
+        }
+    }
+    //类型维度  前者用于将“qq”和“baidu”产品特性进行分组，后者用于根据 API 级别对产品特性配置进行分组
+    flavorDimensions "mode", "api"
+    //产品特性 3
+    productFlavors {//默认 生成的编译版本数目=版本类型3*产品特性3
+        // 如果配置了类型维度则 生成的编译版本数目=版本类型3*类型维度的类型1总数（mode是3）*类型维度的类型2总数（api是2）*...
+        qq {
+            //buildConfigField "String", "VENDER", "\"InCall\""
+            dimension "mode"
+            applicationIdSuffix ".qq"
+            versionNameSuffix ".qq"
+
+        }
+        baidu {
+            dimension "mode"
+            applicationIdSuffix ".baidu"
+            versionNameSuffix ".baidu"
+        }
+        wangyi {
+            dimension "mode"
+            applicationIdSuffix ".wangyi"
+            versionNameSuffix ".wangyi"
+        }
+        minApi19 {
+            dimension "api"
+            minSdkVersion 19
+            versionCode 30000 + android.defaultConfig.versionCode
+            versionNameSuffix ".minApi19"
+        }
+//        minApi20 {
+//            dimension "api"
+//            minSdkVersion 20
+//            versionCode 30000 + android.defaultConfig.versionCode
+//            versionNameSuffix ".minApi19"
+//        }
+    }
+    //源文件 非常重要！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+    //Gradle依次转到 MyApplication > Tasks > android，
+    // 然后双击 sourceSets。Gradle 执行该任务后，系统应该会打开 Run 窗口以显示输出,此输出只是优先级是第一位的位置，如果没有会按照
+    //编译变体 > 编译版本类型 > 正式版类型，即产品特性源集 > 主源集 > 库依赖项 的顺序查找
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+            resources.srcDirs = ['src/main/resources']
+            aidl.srcDirs = ['src/main/aidl']
+            res.srcDirs = ['src/main/res']
+            assets.srcDirs = ['src/main/assets']
+            jniLibs.srcDir 'src/main/jniLibs'
+        }
+        baidu {
+            manifest.srcFile 'src/baidu/AndroidManifest.xml'
+            res.srcDirs = ['src/baidu/res']
+            java.srcDirs = ['src/baidu/java']
+            //如果改为：java.srcDirs = ['src/qq/java'] 则他会优先找qq里的java文件
+        }
+
+    }
+    //构建多个apk
+//    splits {
+//        // Configures multiple APKs based on screen density.
+//        density {
+//            // Configures multiple APKs based on screen density.
+//            enable true
+//            // Specifies a list of screen densities Gradle should not create multiple APKs for.
+//            exclude "ldpi", "xxhdpi", "xxxhdpi"
+//            // Specifies a list of compatible screen size settings for the manifest.
+//            compatibleScreens 'small', 'normal', 'large', 'xlarge'
+//        }
+//        // Configures multiple APKs based on ABI.
+//        abi {
+//            // Enables building multiple APKs per ABI.
+//            enable true
+//            // By default all ABIs are included, so use reset() and include to specify that we only
+//            // want APKs for x86 and x86_64.
+//            // Resets the list of ABIs that Gradle should create APKs for to none.
+//            reset()
+//            // Specifies a list of ABIs that Gradle should create APKs for.
+//            include "x86", "x86_64"
+//            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
+//            universalApk false
+//        }
+//    }
+
+//    android.applicationVariants.all {
+//        variant ->
+//            variant.outputs.all {
+//                outputFileName = "multipkg.apk"
+//            }
+//    }
+    //过滤变体
+//    variantFilter { variant ->
+//        def names = variant.flavors*.name
+//        // To check for a certain build type, use variant.buildType.name == "<buildType>"
+//        if (names.contains("minApi21") && names.contains("demo")) {
+//            // Gradle ignores any variants that satisfy the conditions above.
+//            setIgnore(true)
+//        }
+//    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    //implementation 单个依赖
+    //api 可传递，多个模块公用依赖
+    //compileOnly 只会将依赖项添加到编译类路径（也就是说，不会将其添加到编译输出）
+    //runtimeOnly 只会将依赖项添加到编译输出
+    //annotationProcessor 要添加对作为注解处理器的库的依赖关系，您必须使用 annotationProcessor 配置将其添加到注解处理器类路径
+
+    //定制编译变体依赖
+    //例如，要将 implementation 依赖项仅添加到“free”产品特性（使用远程二进制文件依赖项），请使用如下所示的代码：
+    //
+    //dependencies {
+    //        freeImplementation 'com.google.firebase:firebase-ads:9.8.0'
+    //    }
+    //还可以在 产品特性和版本类型组合在一起的变体添加依赖项
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="com.example.multipackagedemo"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    Android 构建工具使用 package 属性来发挥两种作用（必须与包结构一致，否则下面两项报错）：
+    它会将此名称用作应用生成的 R.java 类的命名空间。
+    示例：对于上面的清单，R 类将为 com.example.myapp.R。
+    它会使用此名称解析清单文件中声明的任何相关类名。
+    示例：对于上面的清单，声明为 <activity android:name=".MainActivity">
+    的 Activity 将解析为 com.example.myapp.MainActivity-->
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
